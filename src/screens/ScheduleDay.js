@@ -6,8 +6,9 @@ import _ from 'lodash';
 
 import { connectTopNavigation } from '../Navigation';
 import { RegularText, SemiBoldText, BoldText } from '../components/StyledText';
-import { Colors } from '../constants';
+import { Colors, Layout } from '../constants';
 import MenuButton from '../components/MenuButton';
+import SaveButton from '../components/SaveButton';
 
 import FullSchedule from '../data/schedule.json';
 
@@ -22,9 +23,17 @@ class ScheduleRow extends React.Component {
         style={{ flex: 1, backgroundColor: '#fff' }}
       >
         <View style={styles.row}>
-          <BoldText>{item.title}</BoldText>
-          {item.speaker ? <SemiBoldText>{item.speaker}</SemiBoldText> : null}
-          <RegularText>{item.room}</RegularText>
+          <View style={styles.rowContent}>
+            <BoldText>{item.title}</BoldText>
+            {item.speaker ? <SemiBoldText>{item.speaker}</SemiBoldText> : null}
+            <RegularText>{item.room}</RegularText>
+          </View>
+          <View style={styles.actions}>
+            <SaveButton
+              active={this.props.saved}
+              savePress={this.props.toggleSaved}
+            />
+          </View>
         </View>
       </RectButton>
     );
@@ -59,6 +68,9 @@ export default function ScheduleDay(options) {
         </BoldText>
       ),
     };
+    state = {
+      savedTalks: {},
+    };
 
     render() {
       return (
@@ -68,7 +80,7 @@ export default function ScheduleDay(options) {
           renderItem={this._renderItem}
           renderSectionHeader={this._renderSectionHeader}
           sections={slotsData}
-          keyExtractor={(item, index) => index}
+          keyExtractor={item => _.snakeCase(item.title)}
         />
       );
     }
@@ -82,11 +94,28 @@ export default function ScheduleDay(options) {
     };
 
     _renderItem = ({ item }) => {
-      return <ScheduleRow item={item} onPress={this._handlePressRow} />;
+      const key = _.snakeCase(item.title);
+      return (
+        <ScheduleRow
+          item={item}
+          onPress={this._handlePressRow}
+          saved={this.state.savedTalks[key]}
+          toggleSaved={this._handleSaveToggle.bind(this, key)}
+        />
+      );
     };
 
     _handlePressRow = item => {
-      this.props.topNavigation.navigate('Details', {scheduleSlot: item});
+      this.props.topNavigation.navigate('Details', { scheduleSlot: item });
+    };
+
+    _handleSaveToggle = key => {
+      this.setState(state => ({
+        savedTalks: {
+          ...state.savedTalks,
+          [key]: !state.savedTalks[key],
+        },
+      }));
     };
   }
 
@@ -111,6 +140,8 @@ export default function ScheduleDay(options) {
 
 const styles = StyleSheet.create({
   row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: '#eee',
@@ -122,5 +153,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
     borderWidth: 1,
     borderColor: '#eee',
+  },
+  content: {
+    width: Layout.window.width * 0.8,
   },
 });
