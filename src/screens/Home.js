@@ -1,4 +1,5 @@
 import React from 'react';
+import { WebBrowser } from 'expo';
 import { Text, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { LinearGradient, Video } from 'expo';
 import { connectDrawerButton } from '../Navigation';
@@ -57,7 +58,7 @@ class Home extends React.Component {
                 Nashville, Tennesse
               </SemiBoldText>
               <View style={{ paddingTop: 8, alignItems: 'center' }}>
-                <RectButton style={styles.button}>
+                <RectButton style={styles.button} onPress={this._openTickets}>
                   <BoldText style={styles.buttonText}>Buy a ticket</BoldText>
                 </RectButton>
                 {/* <RectButton style={styles.button}>
@@ -84,6 +85,12 @@ class Home extends React.Component {
       </View>
     );
   }
+  
+  _openTickets = () => {
+    WebBrowser.openBrowserAsync(
+      'https://www.eventbrite.com/e/nodevember-2017-tickets-34928136998'
+    );
+  };
 }
 
 const styles = StyleSheet.create({
